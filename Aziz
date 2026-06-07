@@ -1,5 +1,5 @@
 -- Aziz Hub V3: Official GitHub Loader Protocol
-local SECRET_KEY = "Aziz2026" -- Change this to your desired password!
+local SECRET_KEY = "test105" -- Change this to your desired password!
 local RAW_GITHUB_URL = "https://raw.githubusercontent.com/chitdm/Rival-script/refs/heads/main/Aziz%20hun"
 
 local ScreenGui = Instance.new("ScreenGui")
