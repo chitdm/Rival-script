@@ -1,0 +1,478 @@
+-- Aziz Hub V3: Fixed UI + Minimize Protocol (Clean Edition)
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local UICorner = Instance.new("UICorner")
+local TitleLabel = Instance.new("TextLabel")
+local MinimizeButton = Instance.new("TextButton")
+local CloseButton = Instance.new("TextButton")
+local SilentAimButton = Instance.new("TextButton")
+local RageButton = Instance.new("TextButton")
+local AntiCheatButton = Instance.new("TextButton")
+local UICorner_2 = Instance.new("UICorner")
+local UICorner_3 = Instance.new("UICorner")
+local UICorner_4 = Instance.new("UICorner")
+local UICorner_5 = Instance.new("UICorner")
+local UICorner_Min = Instance.new("UICorner")
+
+-- Safe CoreGui/PlayerGui Fallback Parent Interceptor
+local success, targetParent = pcall(function()
+    return game:GetService("CoreGui")
+end)
+if not success or not targetParent then
+    targetParent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+end
+
+ScreenGui.Parent = targetParent
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+MainFrame.Position = UDim2.new(0.35, 0, 0.3, 0)
+MainFrame.Size = UDim2.new(0, 300, 0, 310) -- Reset back to original height
+MainFrame.Active = true
+MainFrame.ClipsDescendants = true
+
+UICorner.Parent = MainFrame
+
+TitleLabel.Name = "TitleLabel"
+TitleLabel.Parent = MainFrame
+TitleLabel.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+TitleLabel.BackgroundTransparency = 1.000
+TitleLabel.Size = UDim2.new(0, 200, 0, 40)
+TitleLabel.Font = Enum.Font.SourceSansBold
+TitleLabel.Text = "Aziz Hub V3"
+TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleLabel.TextSize = 18.000
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local UIPadding = Instance.new("UIPadding")
+UIPadding.Parent = TitleLabel
+UIPadding.PaddingLeft = UDim.new(0, 15)
+
+CloseButton.Name = "CloseButton"
+CloseButton.Parent = MainFrame
+CloseButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+CloseButton.Position = UDim2.new(0, 265, 0, 10)
+CloseButton.Size = UDim2.new(0, 25, 0, 25)
+CloseButton.Font = Enum.Font.SourceSansBold
+CloseButton.Text = "X"
+CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseButton.TextSize = 14.000
+
+UICorner_2.CornerRadius = UDim.new(0, 6)
+UICorner_2.Parent = CloseButton
+
+MinimizeButton.Name = "MinimizeButton"
+MinimizeButton.Parent = MainFrame
+MinimizeButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+MinimizeButton.Position = UDim2.new(0, 233, 0, 10)
+MinimizeButton.Size = UDim2.new(0, 25, 0, 25)
+MinimizeButton.Font = Enum.Font.SourceSansBold
+MinimizeButton.Text = "-"
+MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+MinimizeButton.TextSize = 16.000
+
+UICorner_Min.CornerRadius = UDim.new(0, 6)
+UICorner_Min.Parent = MinimizeButton
+
+local ContentFrame = Instance.new("Frame")
+ContentFrame.Name = "ContentFrame"
+ContentFrame.Parent = MainFrame
+ContentFrame.BackgroundTransparency = 1.000
+ContentFrame.Size = UDim2.new(1, 0, 1, -40)
+ContentFrame.Position = UDim2.new(0, 0, 0, 40)
+
+-- Silent Aim Button Setup
+SilentAimButton.Name = "SilentAimButton"
+SilentAimButton.Parent = ContentFrame
+SilentAimButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+SilentAimButton.Position = UDim2.new(0, 20, 0, 15)
+SilentAimButton.Size = UDim2.new(0, 260, 0, 50)
+SilentAimButton.Font = Enum.Font.SourceSansBold
+SilentAimButton.Text = "Silent Aim: OFF"
+SilentAimButton.TextColor3 = Color3.fromRGB(255, 150, 50)
+SilentAimButton.TextSize = 16.000
+
+UICorner_3.Parent = SilentAimButton
+
+-- Rage Mode Button Setup
+RageButton.Name = "RageButton"
+RageButton.Parent = ContentFrame
+RageButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+RageButton.Position = UDim2.new(0, 20, 0, 85)
+RageButton.Size = UDim2.new(0, 260, 0, 50)
+RageButton.Font = Enum.Font.SourceSansBold
+RageButton.Text = "Rage Mode: OFF"
+RageButton.TextColor3 = Color3.fromRGB(255, 50, 50)
+RageButton.TextSize = 16.000
+
+UICorner_4.Parent = RageButton
+
+-- Anti Cheat Safety Button Setup
+AntiCheatButton.Name = "AntiCheatButton"
+AntiCheatButton.Parent = ContentFrame
+AntiCheatButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+AntiCheatButton.Position = UDim2.new(0, 20, 0, 155)
+AntiCheatButton.Size = UDim2.new(0, 260, 0, 50)
+AntiCheatButton.Font = Enum.Font.SourceSansBold
+AntiCheatButton.Text = "Safety Mode: OFF"
+AntiCheatButton.TextColor3 = Color3.fromRGB(50, 255, 150)
+AntiCheatButton.TextSize = 16.000
+
+UICorner_5.Parent = AntiCheatButton
+
+-- Dragging Functionality
+local UserInputService = game:GetService("UserInputService")
+local dragging, dragInput, dragStart, startPos
+
+local function update(input)
+    local delta = input.Position - dragStart
+    MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+MainFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = MainFrame.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+MainFrame.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        update(input)
+    end
+end)
+
+-- ============================================================================
+-- GAME LOGIC BACKEND
+-- ============================================================================
+
+local __p6q7r8 = getgenv()
+if __p6q7r8.__s9t0u1 then
+    __p6q7r8.__s9t0u1:Shutdown()
+end
+__p6q7r8.__s9t0u1 = {}
+
+task.spawn(function()
+    local safe_cloneref = (cloneref or function(service) return service end)
+    local __a1b2c3 = setmetatable({}, {
+        __index = function(__d4e5f6, __g7h8i9)
+            local status, value = pcall(function() return game:GetService(__g7h8i9) end)
+            return status and safe_cloneref(value) or nil
+        end
+    })
+
+    local __v2w3x4 = __a1b2c3.Players
+    local __y5z6a7 = __a1b2c3.RunService
+    local __b8c9d0 = __a1b2c3.ReplicatedStorage
+    local __e1f2g3 = __a1b2c3.Workspace
+    local __k7l8m9 = __v2w3x4.LocalPlayer
+    
+    local playerScripts = __k7l8m9:WaitForChild("PlayerScripts", 5)
+    local modules = playerScripts and playerScripts:WaitForChild("Modules", 5)
+    local itemTypes = modules and modules:WaitForChild("ItemTypes", 5)
+    local gunScript = itemTypes and itemTypes:WaitForChild("Gun", 5)
+    local utilityFolder = __b8c9d0:WaitForChild("Modules", 5)
+    local utilityScript = utilityFolder and utilityFolder:WaitForChild("Utility", 5)
+
+    if not (gunScript and utilityScript) then return end
+
+    local __t6u7v8 = require(gunScript)
+    local __w9x0y1 = require(utilityScript)
+
+    local __z2a3b4 = setmetatable({}, {
+        __index = function(_, __c5d6e7)
+            local __f8g9h0 = __k7l8m9.Character
+            if not __f8g9h0 then return nil end
+            if __c5d6e7 == "__root" then
+                return __f8g9h0:FindFirstChild("HumanoidRootPart")
+            elseif __c5d6e7 == "__head" then
+                return __f8g9h0:FindFirstChild("Head")
+            end
+            return nil
+        end
+    })
+
+    local __i1j2k3 = __p6q7r8.__s9t0u1
+
+    function __i1j2k3:__init()
+        self.__active = false       
+        self.__silent = false       
+        self.__safeMode = false     
+        self.__target = nil
+        self.__desync = false
+        self.__conn1 = nil
+        self.__conn2 = nil
+        self.__task1 = nil
+        self.__oldfunc = nil
+        self:__setup()
+    end
+
+    function __i1j2k3:__setup()
+        self.__conn1 = __y5z6a7.Heartbeat:Connect(function()
+            if not (self.__active or self.__silent) then return end
+            self.__target = self:__find()
+        end)
+
+        local __l4m5n6 = __t6u7v8.StartShooting
+        self.__oldfunc = __l4m5n6
+        __t6u7v8.StartShooting = function(__o7p8q9, ...)
+            local __r0s1t2 = {__l4m5n6(__o7p8q9, ...)}
+            if not __o7p8q9.ClientFighter or not __o7p8q9.ClientFighter.IsLocalPlayer then
+                return unpack(__r0s1t2)
+            end
+
+            local __u3v4w5 = __r0s1t2[3]
+            if not __u3v4w5 or typeof(__u3v4w5) ~= "table" then
+                return unpack(__r0s1t2)
+            end
+
+            local __x6y7z8 = self.__target
+            if not __x6y7z8 or not __x6y7z8.Character then
+                return unpack(__r0s1t2)
+            end
+
+            if self.__safeMode and math.random(1, 100) > 70 then
+                return unpack(__r0s1t2)
+            end
+
+            local __a9b0c1 = __x6y7z8.Character:FindFirstChild("HumanoidRootPart") or __x6y7z8.Character:FindFirstChild("Torso")
+            if not __a9b0c1 then return unpack(__r0s1t2) end
+
+            if self.__active and not self.__safeMode then
+                __r0s1t2[4] = true
+                if not self.__desync or self.__curr ~= __x6y7z8 then
+                    self:__desync_start(__x6y7z8)
+                    task.wait(0.1)
+                end
+
+                if self.__task1 then
+                    task.cancel(self.__task1)
+                    self.__task1 = nil
+                end
+
+                self.__task1 = task.delay(0.15, function()
+                    self:__desync_stop()
+                end)
+            end
+
+            if self.__silent then
+                local __d2e3f4 = __a9b0c1.Position
+                local __g5h6i7 = __a9b0c1.CFrame
+                
+                if self.__safeMode then
+                    __d2e3f4 = __d2e3f4 + Vector3.new(math.random(-10, 10)/50, math.random(-10, 10)/50, math.random(-10, 10)/50)
+                end
+
+                local __j8k9l0 = __d2e3f4 - Vector3.new(0, 5, 0)
+                local __m1n2o3 = CFrame.lookAt(__j8k9l0, __d2e3f4)
+                local __p4q5r6 = __g5h6i7:ToObjectSpace(CFrame.new(__d2e3f4))
+
+                __u3v4w5[utf8.char(0)] = __w9x0y1:EncodeCFrame(CFrame.new(__j8k9l0, __d2e3f4) * CFrame.Angles(__m1n2o3:ToOrientation()))
+                __u3v4w5[utf8.char(1)] = __w9x0y1:EncodeCFrame(CFrame.new(__d2e3f4) * CFrame.Angles(__m1n2o3:ToOrientation()))
+                __u3v4w5[utf8.char(2)] = __a9b0c1
+                __u3v4w5[utf8.char(3)] = __w9x0y1:EncodeCFrame(__p4q5r6)
+            end
+
+            return unpack(__r0s1t2)
+        end
+    end
+
+    function __i1j2k3:__find()
+        local myChar = __k7l8m9.Character
+        if not myChar then return nil end
+        local myRoot = myChar:FindFirstChild("HumanoidRootPart")
+        if not myRoot then return nil end
+       
+        local closest = nil
+        local closestDist = math.huge
+        local MAX_DISTANCE = self.__safeMode and 120 or 300 
+        local camera = __e1f2g3.CurrentCamera
+
+        for _, player in next, __v2w3x4:GetPlayers() do
+            if player == __k7l8m9 then continue end
+            if player:GetAttribute("TeamID") == __k7l8m9:GetAttribute("TeamID") then continue end
+           
+            local char = player.Character
+            if not char then continue end
+
+            local root = char:FindFirstChild("HumanoidRootPart")
+            local hum = char:FindFirstChildWhichIsA("Humanoid")
+            
+            if not (root and hum and hum.Health > 0) then continue end
+           
+            local dist = (myRoot.Position - root.Position).Magnitude
+            if dist > MAX_DISTANCE then continue end
+
+            if self.__safeMode and camera then
+                local _, onScreen = camera:WorldToViewportPoint(root.Position)
+                if not onScreen then continue end
+            end
+            
+            if dist < closestDist then
+                closestDist = dist
+                closest = player
+            end
+        end
+        
+        return closest
+    end
+
+    function __i1j2k3:__desync_start(__c3d4e5)
+        if self.__safeMode then return end 
+        if self.__conn2 then self.__conn2:Disconnect() end
+        self.__desync = true
+        self.__curr = __c3d4e5
+
+        self.__conn2 = __y5z6a7.Heartbeat:Connect(function()
+            if not self.__desync or self.__safeMode then return end
+            local __f6g7h8 = __z2a3b4.__root
+            if not __f6g7h8 then return end
+
+            local __i9j0k1 = __c3d4e5.Character and __c3d4e5.Character:FindFirstChild("HumanoidRootPart")
+            if not __i9j0k1 then
+                self:__desync_stop()
+                return
+            end
+
+            local __l2m3n4 = __f6g7h8.CFrame
+            local __o5p6q7 = __f6g7h8.Velocity
+            local __r8s9t0 = __f6g7h8.RotVelocity
+
+            __f6g7h8.CFrame = __i9j0k1.CFrame * CFrame.new(0, -5, 0)
+
+            __y5z6a7:BindToRenderStep("__restore", 101, function()
+                __f6g7h8.CFrame = __l2m3n4
+                __f6g7h8.Velocity = __o5p6q7
+                __f6g7h8.RotVelocity = __r8s9t0
+                __y5z6a7:UnbindFromRenderStep("__restore")
+            end)
+        end)
+    end
+
+    function __i1j2k3:__desync_stop()
+        self.__desync = false
+        self.__curr = nil
+        if self.__conn2 then
+            self.__conn2:Disconnect()
+            self.__conn2 = nil
+        end
+    end
+
+    function __i1j2k3:Shutdown()
+        self.__active = false
+        self.__silent = false
+        self.__safeMode = false
+        if self.__conn1 then self.__conn1:Disconnect() end
+        if self.__conn2 then self.__conn2:Disconnect() end
+        if self.__task1 then task.cancel(self.__task1) end
+        if self.__oldfunc then
+            __t6u7v8.StartShooting = self.__oldfunc
+        end
+    end
+
+    __i1j2k3:__init()
+end)
+
+-- ============================================================================
+-- INTERFACE CONTROLS
+-- ============================================================================
+
+local isMinimized = false
+
+MinimizeButton.MouseButton1Click:Connect(function()
+    isMinimized = not isMinimized
+    if isMinimized then
+        MainFrame.Size = UDim2.new(0, 300, 0, 40)
+        MinimizeButton.Text = "+"
+        ContentFrame.Visible = false
+    else
+        MainFrame.Size = UDim2.new(0, 300, 0, 310)
+        MinimizeButton.Text = "-"
+        ContentFrame.Visible = true
+    end
+end)
+
+SilentAimButton.MouseButton1Click:Connect(function()
+    local engine = __p6q7r8.__s9t0u1
+    if not engine then return end
+    engine.__silent = not engine.__silent
+    
+    if engine.__silent then
+        SilentAimButton.Text = "Silent Aim: ON"
+        SilentAimButton.BackgroundColor3 = Color3.fromRGB(255, 150, 50)
+        SilentAimButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    else
+        SilentAimButton.Text = "Silent Aim: OFF"
+        SilentAimButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+        SilentAimButton.TextColor3 = Color3.fromRGB(255, 150, 50)
+    end
+end)
+
+RageButton.MouseButton1Click:Connect(function()
+    local engine = __p6q7r8.__s9t0u1
+    if not engine or engine.__safeMode then return end 
+
+    engine.__active = not engine.__active
+    
+    if engine.__active then
+        RageButton.Text = "Rage Mode: ON"
+        RageButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+        RageButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    else
+        RageButton.Text = "Rage Mode: OFF"
+        RageButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+        RageButton.TextColor3 = Color3.fromRGB(255, 50, 50)
+        if engine.__desync_stop then engine:__desync_stop() end
+    end
+end)
+
+AntiCheatButton.MouseButton1Click:Connect(function()
+    local engine = __p6q7r8.__s9t0u1
+    if not engine then return end
+
+    engine.__safeMode = not engine.__safeMode
+    
+    if engine.__safeMode then
+        AntiCheatButton.Text = "Safety Mode: ON"
+        AntiCheatButton.BackgroundColor3 = Color3.fromRGB(50, 255, 150)
+        AntiCheatButton.TextColor3 = Color3.fromRGB(25, 25, 25)
+        
+        engine.__active = false
+        if engine.__desync_stop then engine:__desync_stop() end
+        RageButton.Text = "Rage Mode: LOCKED"
+        RageButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+        RageButton.TextColor3 = Color3.fromRGB(100, 50, 50)
+    else
+        AntiCheatButton.Text = "Safety Mode: OFF"
+        AntiCheatButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+        AntiCheatButton.TextColor3 = Color3.fromRGB(50, 255, 150)
+        
+        RageButton.Text = "Rage Mode: OFF"
+        RageButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+        RageButton.TextColor3 = Color3.fromRGB(255, 50, 50)
+    end
+end)
+
+CloseButton.MouseButton1Click:Connect(function()
+    local engine = __p6q7r8.__s9t0u1
+    if engine and engine.Shutdown then
+        engine:Shutdown()
+    end
+    __p6q7r8.__s9t0u1 = nil
+    ScreenGui:Destroy()
+end)
